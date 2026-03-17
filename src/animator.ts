@@ -5,7 +5,7 @@ function sleep(ms: number): Promise<void> {
 async function typeText(element: HTMLTextAreaElement, text: string): Promise<void> {
   for (const char of text) {
     element.value += char;
-    const delay = 90 + Math.random() * 60 - 30;
+    const delay = 120 + Math.random() * 80 - 40;
     await sleep(delay);
   }
 }
@@ -16,23 +16,23 @@ async function runAnimation(
   sendBtn: HTMLButtonElement,
   query: string,
 ): Promise<void> {
-  await sleep(500);
+  await sleep(800);
 
   inputBox.classList.add('focused');
-  await sleep(100);
+  await sleep(200);
 
   await typeText(textarea, query);
 
-  await sleep(500);
+  await sleep(700);
 
   sendBtn.classList.add('active');
-  await sleep(200);
+  await sleep(300);
 
   sendBtn.classList.add('pressed');
-  await sleep(150);
+  await sleep(200);
   sendBtn.classList.remove('pressed');
 
-  await sleep(800);
+  await sleep(1000);
 
   window.location.href = `https://claude.ai/new?q=${encodeURIComponent(query)}`;
 }

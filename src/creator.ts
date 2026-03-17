@@ -4,7 +4,7 @@ export function initCreator(): void {
   app.innerHTML = `
     <div class="creator">
       <div class="creator-content">
-        <h1 class="creator-title">Go Ask Claude</h1>
+        <h1 class="creator-title">Let Me Ask Claude</h1>
         <p class="creator-subtitle">For when someone asks you something they could just ask Claude</p>
         <textarea
           class="creator-textarea"
