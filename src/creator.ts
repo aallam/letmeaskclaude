@@ -20,6 +20,7 @@ export function initCreator(): void {
           </div>
         </div>
       </div>
+      <p class="creator-crosslink">Looking for a <a href="https://letmeaskchatgpt.aallam.com" target="_blank" rel="noopener">ChatGPT version</a>?</p>
     </div>
   `;
 
