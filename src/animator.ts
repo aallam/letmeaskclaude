@@ -2,11 +2,74 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function typeText(element: HTMLTextAreaElement, text: string): Promise<void> {
-  for (const char of text) {
-    element.value += char;
-    const delay = 120 + Math.random() * 80 - 40;
-    await sleep(delay);
+const NEARBY_KEYS: Record<string, string> = {
+  a: 's', b: 'v', c: 'x', d: 'f', e: 'r', f: 'g', g: 'h',
+  h: 'g', i: 'o', j: 'k', k: 'l', l: 'k', m: 'n', n: 'b',
+  o: 'p', p: 'o', q: 'w', r: 't', s: 'd', t: 'y', u: 'i',
+  v: 'c', w: 'e', x: 'z', y: 'u', z: 'x',
+};
+
+type Action =
+  | { type: 'add'; char: string }
+  | { type: 'delete' }
+  | { type: 'pause'; ms: number };
+
+function buildActions(text: string): Action[] {
+  const actions: Action[] = [];
+  let typoCount = 0;
+  let charsSinceLastTypo = Infinity;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const lower = char.toLowerCase();
+    const canTypo =
+      typoCount < 2 &&
+      charsSinceLastTypo >= 4 &&
+      lower in NEARBY_KEYS &&
+      Math.random() < 0.12;
+
+    if (canTypo) {
+      // Type 1–2 wrong characters
+      const wrongCount = 1 + (i + 1 < text.length && text[i + 1].toLowerCase() in NEARBY_KEYS ? Math.round(Math.random()) : 0);
+      actions.push({ type: 'add', char: NEARBY_KEYS[lower] });
+      if (wrongCount === 2 && i + 1 < text.length) {
+        actions.push({ type: 'add', char: NEARBY_KEYS[text[i + 1].toLowerCase()] });
+      }
+      // Pause (noticing the mistake)
+      actions.push({ type: 'pause', ms: 300 });
+      // Backspace the wrong characters
+      for (let d = 0; d < wrongCount; d++) {
+        actions.push({ type: 'delete' });
+      }
+      // Pause before resuming
+      actions.push({ type: 'pause', ms: 150 });
+
+      typoCount++;
+      charsSinceLastTypo = 0;
+    }
+
+    actions.push({ type: 'add', char });
+    charsSinceLastTypo++;
+  }
+
+  return actions;
+}
+
+async function executeActions(element: HTMLTextAreaElement, actions: Action[]): Promise<void> {
+  for (const action of actions) {
+    switch (action.type) {
+      case 'add':
+        element.value += action.char;
+        await sleep(120 + Math.random() * 80 - 40);
+        break;
+      case 'delete':
+        element.value = element.value.slice(0, -1);
+        await sleep(80);
+        break;
+      case 'pause':
+        await sleep(action.ms);
+        break;
+    }
   }
 }
 
@@ -21,7 +84,8 @@ async function runAnimation(
   inputBox.classList.add('focused');
   await sleep(200);
 
-  await typeText(textarea, query);
+  const actions = buildActions(query);
+  await executeActions(textarea, actions);
 
   await sleep(700);
 
